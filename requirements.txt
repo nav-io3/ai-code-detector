@@ -1,0 +1,9 @@
+streamlit>=1.50
+scikit-learn
+xgboost
+pandas
+numpy
+joblib
+# optional, only for CodeBERT inside the app:
+# torch
+# transformers

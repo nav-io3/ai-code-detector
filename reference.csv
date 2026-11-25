@@ -1,0 +1,1164 @@
+problem_id,label,model,code
+maths/base_neg2_conversion,0,human,"def decimal_to_negative_base_2(num: int) -> int:
+    if num == 0:
+        return 0
+    ans = """"
+    while num != 0:
+        num, rem = divmod(num, -2)
+        if rem < 0:
+            rem += 2
+            num += 1
+        ans = str(rem) + ans
+    return int(ans)
+"
+strings/damerau_levenshtein_distance,0,human,"def damerau_levenshtein_distance(first_string: str, second_string: str) -> int:
+    # Create a dynamic programming matrix to store the distances
+    dp_matrix = [[0] * (len(second_string) + 1) for _ in range(len(first_string) + 1)]
+
+    # Initialize the matrix
+    for i in range(len(first_string) + 1):
+        dp_matrix[i][0] = i
+    for j in range(len(second_string) + 1):
+        dp_matrix[0][j] = j
+
+    # Fill the matrix
+    for i, first_char in enumerate(first_string, start=1):
+        for j, second_char in enumerate(second_string, start=1):
+            cost = int(first_char != second_char)
+
+            dp_matrix[i][j] = min(
+                dp_matrix[i - 1][j] + 1,  # Deletion
+                dp_matrix[i][j - 1] + 1,  # Insertion
+                dp_matrix[i - 1][j - 1] + cost,  # Substitution
+            )
+
+            if (
+                i > 1
+                and j > 1
+                and first_string[i - 1] == second_string[j - 2]
+                and first_string[i - 2] == second_string[j - 1]
+            ):
+                # Transposition
+                dp_matrix[i][j] = min(dp_matrix[i][j], dp_matrix[i - 2][j - 2] + cost)
+
+    return dp_matrix[-1][-1]
+"
+maths/fermat_little_theorem,0,human,"# Python program to show the usage of Fermat's little theorem in a division
+# According to Fermat's little theorem, (a / b) mod p always equals
+# a * (b ^ (p - 2)) mod p
+# Here we assume that p is a prime number, b divides a, and p doesn't divide b
+# Wikipedia reference: https://en.wikipedia.org/wiki/Fermat%27s_little_theorem
+
+
+def binary_exponentiation(a: int, n: int, mod: int) -> int:
+    if n == 0:
+        return 1
+
+    elif n % 2 == 1:
+        return (binary_exponentiation(a, n - 1, mod) * a) % mod
+
+    else:
+        b = binary_exponentiation(a, n // 2, mod)
+        return (b * b) % mod
+
+
+# a prime number
+p = 701
+
+a = 1000000000
+b = 10
+
+# using binary exponentiation function, O(log(p)):
+print((a / b) % p == (a * binary_exponentiation(b, p - 2, p)) % p)
+
+# using Python operators:
+print((a / b) % p == (a * b ** (p - 2)) % p)
+"
+data_structures/circular_queue,0,human,"# Implementation of Circular Queue (using Python lists)
+
+
+class CircularQueue:
+
+    def __init__(self, n: int) -> None:
+        self.n = n
+        self.array = [None] * self.n
+        self.front = 0  # index of the first element
+        self.rear = 0
+        self.size = 0
+
+    def __len__(self) -> int:
+        return self.size
+
+    def is_empty(self) -> bool:
+        return self.size == 0
+
+    def first(self):
+        return False if self.is_empty() else self.array[self.front]
+
+    def enqueue(self, data) -> ""CircularQueue"":
+        if self.size >= self.n:
+            raise Exception(""QUEUE IS FULL"")
+
+        self.array[self.rear] = data
+        self.rear = (self.rear + 1) % self.n
+        self.size += 1
+        return self
+
+    def dequeue(self):
+        if self.size == 0:
+            raise Exception(""UNDERFLOW"")
+
+        temp = self.array[self.front]
+        self.array[self.front] = None
+        self.front = (self.front + 1) % self.n
+        self.size -= 1
+        return temp
+"
+sorts/quick_sort,0,human,"from __future__ import annotations
+
+from random import randrange
+from typing import Any, Protocol
+
+
+class Comparable(Protocol):
+    def __lt__(self, other: Any, /) -> bool: ...
+
+
+def quick_sort[T: Comparable](collection: list[T]) -> list[T]:
+    if len(collection) < 2:
+        return collection
+    pivot_index = randrange(len(collection))
+    pivot = collection[pivot_index]
+    lesser = [item for item in collection if item < pivot]
+    equal = [item for item in collection if item == pivot]
+    greater = [item for item in collection if item > pivot]
+    return [*quick_sort(lesser), *equal, *quick_sort(greater)]
+
+
+if __name__ == ""__main__"":
+    user_input = input(""Enter numbers separated by a comma:\n"").strip()
+    unsorted = [int(item) for item in user_input.split("","")]
+    print(quick_sort(unsorted))
+"
+ciphers/deterministic_miller_rabin,0,human,"def miller_rabin(n: int, allow_probable: bool = False) -> bool:
+    if n == 2:
+        return True
+    if not n % 2 or n < 2:
+        return False
+    if n > 5 and n % 10 not in (1, 3, 7, 9):  # can quickly check last digit
+        return False
+    if n > 3_317_044_064_679_887_385_961_981 and not allow_probable:
+        raise ValueError(
+            ""Warning: upper bound of deterministic test is exceeded. ""
+            ""Pass allow_probable=True to allow probabilistic test. ""
+            ""A return value of True indicates a probable prime.""
+        )
+    # array bounds provided by analysis
+    bounds = [
+        2_047,
+        1_373_653,
+        25_326_001,
+        3_215_031_751,
+        2_152_302_898_747,
+        3_474_749_660_383,
+        341_550_071_728_321,
+        1,
+        3_825_123_056_546_413_051,
+        1,
+        1,
+        318_665_857_834_031_151_167_461,
+        3_317_044_064_679_887_385_961_981,
+    ]
+
+    primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41]
+    for idx, _p in enumerate(bounds, 1):
+        if n < _p:
+            # then we have our last prime to check
+            plist = primes[:idx]
+            break
+    d, s = n - 1, 0
+    # break up n -1 into a power of 2 (s) and
+    # remaining odd component
+    # essentially, solve for d * 2 ** s == n - 1
+    while d % 2 == 0:
+        d //= 2
+        s += 1
+    for prime in plist:
+        pr = False
+        for r in range(s):
+            m = pow(prime, d * 2**r, n)
+            # see article for analysis explanation for m
+            if (r == 0 and m == 1) or ((m + 1) % n == 0):
+                pr = True
+                # this loop will not determine compositeness
+                break
+        if pr:
+            continue
+        # if pr is False, then the above loop never evaluated to true,
+        # and the n MUST be composite
+        return False
+    return True
+
+
+def test_miller_rabin() -> None:
+    assert not miller_rabin(561)
+    assert miller_rabin(563)
+    # 2047
+
+    assert not miller_rabin(838_201)
+    assert miller_rabin(838_207)
+    # 1_373_653
+
+    assert not miller_rabin(17_316_001)
+    assert miller_rabin(17_316_017)
+    # 25_326_001
+
+    assert not miller_rabin(3_078_386_641)
+    assert miller_rabin(3_078_386_653)
+    # 3_215_031_751
+
+    assert not miller_rabin(1_713_045_574_801)
+    assert miller_rabin(1_713_045_574_819)
+    # 2_152_302_898_747
+
+    assert not miller_rabin(2_779_799_728_307)
+    assert miller_rabin(2_779_799_728_327)
+    # 3_474_749_660_383
+
+    assert not miller_rabin(113_850_023_909_441)
+    assert miller_rabin(113_850_023_909_527)
+    # 341_550_071_728_321
+
+    assert not miller_rabin(1_275_041_018_848_804_351)
+    assert miller_rabin(1_275_041_018_848_804_391)
+    # 3_825_123_056_546_413_051
+
+    assert not miller_rabin(79_666_464_458_507_787_791_867)
+    assert miller_rabin(79_666_464_458_507_787_791_951)
+    # 318_665_857_834_031_151_167_461
+
+    assert not miller_rabin(552_840_677_446_647_897_660_333)
+    assert miller_rabin(552_840_677_446_647_897_660_359)
+    # 3_317_044_064_679_887_385_961_981
+    # upper limit for probabilistic test
+
+
+if __name__ == ""__main__"":
+    test_miller_rabin()
+"
+maths/abundant_numbers,0,human,"def is_abundant_number(number: int) -> bool:
+    if not isinstance(number, int):
+        msg = f""Input value of [number={number}] must be an integer""
+        raise TypeError(msg)
+    if number < 1:
+        return False
+
+    divisor_sum = 1  # 1 is always a proper divisor
+    for i in range(2, int(number**0.5) + 1):
+        if number % i == 0:
+            divisor_sum += i
+            if i != number // i:
+                divisor_sum += number // i
+    return divisor_sum > number
+"
+maths/aliquot_sum,0,human,"def aliquot_sum(input_num: int) -> int:
+    if not isinstance(input_num, int):
+        raise ValueError(""Input must be an integer"")
+    if input_num <= 0:
+        raise ValueError(""Input must be positive"")
+    return sum(
+        divisor for divisor in range(1, input_num // 2 + 1) if input_num % divisor == 0
+    )
+"
+ciphers/base58,0,human,"B64_CHARSET = ""ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/""
+
+
+def base64_encode(data: bytes) -> bytes:
+    # Make sure the supplied data is a bytes-like object
+    if not isinstance(data, bytes):
+        msg = f""a bytes-like object is required, not '{data.__class__.__name__}'""
+        raise TypeError(msg)
+
+    binary_stream = """".join(bin(byte)[2:].zfill(8) for byte in data)
+
+    padding_needed = len(binary_stream) % 6 != 0
+
+    if padding_needed:
+        # The padding that will be added later
+        padding = b""="" * ((6 - len(binary_stream) % 6) // 2)
+
+        # Append binary_stream with arbitrary binary digits (0's by default) to make its
+        # length a multiple of 6.
+        binary_stream += ""0"" * (6 - len(binary_stream) % 6)
+    else:
+        padding = b""""
+
+    # Encode every 6 binary digits to their corresponding Base64 character
+    return (
+        """".join(
+            B64_CHARSET[int(binary_stream[index : index + 6], 2)]
+            for index in range(0, len(binary_stream), 6)
+        ).encode()
+        + padding
+    )
+
+
+def base64_decode(encoded_data: str) -> bytes:
+    # Make sure encoded_data is either a string or a bytes-like object
+    if not isinstance(encoded_data, bytes) and not isinstance(encoded_data, str):
+        msg = (
+            ""argument should be a bytes-like object or ASCII string, ""
+            f""not '{encoded_data.__class__.__name__}'""
+        )
+        raise TypeError(msg)
+
+    # In case encoded_data is a bytes-like object, make sure it contains only
+    # ASCII characters so we convert it to a string object
+    if isinstance(encoded_data, bytes):
+        try:
+            encoded_data = encoded_data.decode(""utf-8"")
+        except UnicodeDecodeError:
+            raise ValueError(""base64 encoded data should only contain ASCII characters"")
+
+    padding = encoded_data.count(""="")
+
+    # Check if the encoded string contains non base64 characters
+    if padding:
+        assert all(char in B64_CHARSET for char in encoded_data[:-padding]), (
+            ""Invalid base64 character(s) found.""
+        )
+    else:
+        assert all(char in B64_CHARSET for char in encoded_data), (
+            ""Invalid base64 character(s) found.""
+        )
+
+    # Check the padding
+    assert len(encoded_data) % 4 == 0 and padding < 3, ""Incorrect padding""
+
+    if padding:
+        # Remove padding if there is one
+        encoded_data = encoded_data[:-padding]
+
+        binary_stream = """".join(
+            bin(B64_CHARSET.index(char))[2:].zfill(6) for char in encoded_data
+        )[: -padding * 2]
+    else:
+        binary_stream = """".join(
+            bin(B64_CHARSET.index(char))[2:].zfill(6) for char in encoded_data
+        )
+
+    data = [
+        int(binary_stream[index : index + 8], 2)
+        for index in range(0, len(binary_stream), 8)
+    ]
+
+    return bytes(data)
+"
+data_structures/product_sum,0,human,"from timeit import timeit
+
+
+def product_sum(arr: list[int | list], depth: int) -> int:
+    total_sum = 0
+    for ele in arr:
+        total_sum += product_sum(ele, depth + 1) if isinstance(ele, list) else ele
+    return total_sum * depth
+
+
+def product_sum_array(array: list[int | list]) -> int:
+    return product_sum(array, 1)
+
+
+def product_sum_iterative(arr: list[int | list]) -> int:
+
+    # Initialize queue with depth and multiplication factor
+    queue = [(arr, 1, 1)]
+
+    product_sum = 0
+
+    while queue:
+        queue_front_list, depth, multiplication_factor = queue.pop(0)
+
+        for element in queue_front_list:
+            if isinstance(element, list):
+                queue.append((element, depth + 1, multiplication_factor * (depth + 1)))
+            else:
+                product_sum += element * multiplication_factor
+
+    return product_sum
+
+
+def benchmark() -> None:
+
+    setup = ""from __main__ import product_sum_array, product_sum_iterative""
+
+    print(
+        timeit(""product_sum_array([5, 2, [-7, 1], 3, [6, [-13, 8], 4]])"", setup=setup)
+    )
+    # 1.1448657000437379
+
+    print(
+        timeit(
+            ""product_sum_iterative([5, 2, [-7, 1], 3, [6, [-13, 8], 4]])"", setup=setup
+        )
+    )
+    # 1.6824490998405963
+
+
+    benchmark()
+"
+ciphers/porta_cipher,0,human,"alphabet = {
+    ""A"": (""ABCDEFGHIJKLM"", ""NOPQRSTUVWXYZ""),
+    ""B"": (""ABCDEFGHIJKLM"", ""NOPQRSTUVWXYZ""),
+    ""C"": (""ABCDEFGHIJKLM"", ""ZNOPQRSTUVWXY""),
+    ""D"": (""ABCDEFGHIJKLM"", ""ZNOPQRSTUVWXY""),
+    ""E"": (""ABCDEFGHIJKLM"", ""YZNOPQRSTUVWX""),
+    ""F"": (""ABCDEFGHIJKLM"", ""YZNOPQRSTUVWX""),
+    ""G"": (""ABCDEFGHIJKLM"", ""XYZNOPQRSTUVW""),
+    ""H"": (""ABCDEFGHIJKLM"", ""XYZNOPQRSTUVW""),
+    ""I"": (""ABCDEFGHIJKLM"", ""WXYZNOPQRSTUV""),
+    ""J"": (""ABCDEFGHIJKLM"", ""WXYZNOPQRSTUV""),
+    ""K"": (""ABCDEFGHIJKLM"", ""VWXYZNOPQRSTU""),
+    ""L"": (""ABCDEFGHIJKLM"", ""VWXYZNOPQRSTU""),
+    ""M"": (""ABCDEFGHIJKLM"", ""UVWXYZNOPQRST""),
+    ""N"": (""ABCDEFGHIJKLM"", ""UVWXYZNOPQRST""),
+    ""O"": (""ABCDEFGHIJKLM"", ""TUVWXYZNOPQRS""),
+    ""P"": (""ABCDEFGHIJKLM"", ""TUVWXYZNOPQRS""),
+    ""Q"": (""ABCDEFGHIJKLM"", ""STUVWXYZNOPQR""),
+    ""R"": (""ABCDEFGHIJKLM"", ""STUVWXYZNOPQR""),
+    ""S"": (""ABCDEFGHIJKLM"", ""RSTUVWXYZNOPQ""),
+    ""T"": (""ABCDEFGHIJKLM"", ""RSTUVWXYZNOPQ""),
+    ""U"": (""ABCDEFGHIJKLM"", ""QRSTUVWXYZNOP""),
+    ""V"": (""ABCDEFGHIJKLM"", ""QRSTUVWXYZNOP""),
+    ""W"": (""ABCDEFGHIJKLM"", ""PQRSTUVWXYZNO""),
+    ""X"": (""ABCDEFGHIJKLM"", ""PQRSTUVWXYZNO""),
+    ""Y"": (""ABCDEFGHIJKLM"", ""OPQRSTUVWXYZN""),
+    ""Z"": (""ABCDEFGHIJKLM"", ""OPQRSTUVWXYZN""),
+}
+
+
+def generate_table(key: str) -> list[tuple[str, str]]:
+    return [alphabet[char] for char in key.upper()]
+
+
+def encrypt(key: str, words: str) -> str:
+    cipher = """"
+    count = 0
+    table = generate_table(key)
+    for char in words.upper():
+        cipher += get_opponent(table[count], char)
+        count = (count + 1) % len(table)
+    return cipher
+
+
+def decrypt(key: str, words: str) -> str:
+    return encrypt(key, words)
+
+
+def get_position(table: tuple[str, str], char: str) -> tuple[int, int]:
+    # `char` is either in the 0th row or the 1st row
+    row = 0 if char in table[0] else 1
+    col = table[row].index(char)
+    return row, col
+
+
+def get_opponent(table: tuple[str, str], char: str) -> str:
+    row, col = get_position(table, char.upper())
+    if row == 1:
+        return table[0][col]
+    else:
+        return table[1][col] if row == 0 else char
+
+
+    """"""
+    Demo:
+
+    Enter key: marvin
+    Enter text to encrypt: jessica
+    Encrypted: QRACRWU
+    Decrypted with key: JESSICA
+    """"""
+    key = input(""Enter key: "").strip()
+    text = input(""Enter text to encrypt: "").strip()
+    cipher_text = encrypt(key, text)
+
+    print(f""Encrypted: {cipher_text}"")
+    print(f""Decrypted with key: {decrypt(key, cipher_text)}"")
+"
+greedy_methods/sliding_window,0,human,"def sliding_window(input_string: str) -> int:
+    # Error handling for non-string inputs
+    if not isinstance(input_string, str):
+        raise TypeError(""Input must be a string"")
+
+    # Handle empty string case immediately
+    if len(input_string) == 0:
+        return 0
+
+    # Dictionary to store the most recent index of each character
+    char_index_map: dict[str, int] = {}
+
+    # Initialize the sliding window pointers
+    left: int = 0
+    max_len: int = 0
+    # Traverse the string with a right pointer
+    for right, char in enumerate(input_string):
+        if char in char_index_map and char_index_map[char] >= left:
+            # Move the left pointer to avoid repeating characters
+            left = char_index_map[char] + 1
+        # Update the latest index of the character
+        char_index_map[char] = right
+        # Calculate the current length of the window
+        current_len = right - left + 1
+        max_len = max(max_len, current_len)
+    return max_len
+"
+strings/manacher,0,human,"def palindromic_string(input_string: str) -> str:
+    max_length = 0
+
+    # if input_string is ""aba"" than new_input_string become ""a|b|a""
+    new_input_string = """"
+    output_string = """"
+
+    # append each character + ""|"" in new_string for range(0, length-1)
+    for i in input_string[: len(input_string) - 1]:
+        new_input_string += i + ""|""
+    # append last character
+    new_input_string += input_string[-1]
+
+    # we will store the starting and ending of previous furthest ending palindromic
+    # substring
+    left, right = 0, 0
+
+    # length[i] shows the length of palindromic substring with center i
+    length = [1 for i in range(len(new_input_string))]
+
+    # for each character in new_string find corresponding palindromic string
+    start = 0
+    for j in range(len(new_input_string)):
+        k = 1 if j > right else min(length[left + right - j] // 2, right - j + 1)
+        while (
+            j - k >= 0
+            and j + k < len(new_input_string)
+            and new_input_string[k + j] == new_input_string[j - k]
+        ):
+            k += 1
+
+        length[j] = 2 * k - 1
+
+        # does this string is ending after the previously explored end (that is right) ?
+        # if yes the update the new right to the last index of this
+        if j + k - 1 > right:
+            left = j - k + 1
+            right = j + k - 1
+
+        # update max_length and start position
+        if max_length < length[j]:
+            max_length = length[j]
+            start = j
+
+    # create that string
+    s = new_input_string[start - max_length // 2 : start + max_length // 2 + 1]
+    for i in s:
+        if i != ""|"":
+            output_string += i
+
+    return output_string
+
+
+
+""""""
+...a0...a1...a2.....a3......a4...a5...a6....
+
+consider the string for which we are calculating the longest palindromic substring is
+shown above where ... are some characters in between and right now we are calculating
+the length of palindromic substring with center at a5 with following conditions :
+i) we have stored the length of palindromic substring which has center at a3
+    (starts at left ends at right) and it is the furthest ending till now,
+    and it has ending after a6
+ii) a2 and a4 are equally distant from a3 so char(a2) == char(a4)
+iii) a0 and a6 are equally distant from a3 so char(a0) == char(a6)
+iv) a1 is corresponding equal character of a5 in palindrome with center a3 (remember
+    that in below derivation of a4==a6)
+
+now for a5 we will calculate the length of palindromic substring with center as a5 but
+can we use previously calculated information in some way?
+Yes, look the above string we know that a5 is inside the palindrome with center a3 and
+previously we have calculated that
+a0==a2 (palindrome of center a1)
+a2==a4 (palindrome of center a3)
+a0==a6 (palindrome of center a3)
+so a4==a6
+
+so we can say that palindrome at center a5 is at least as long as palindrome at center
+a1 but this only holds if a0 and a6 are inside the limits of palindrome centered at a3
+so finally ..
+
+len_of_palindrome__at(a5) = min(len_of_palindrome_at(a1), right-a5)
+where a3 lies from left to right and we have to keep updating that
+
+and if the a5 lies outside of left,right boundary we calculate length of palindrome with
+bruteforce and update left,right.
+
+it gives the linear time complexity just like z-function
+""""""
+"
+maths/perfect_number,0,human,"def perfect(number: int) -> bool:
+    if not isinstance(number, int):
+        raise ValueError(""number must be an integer"")
+
+    if number <= 0:
+        return False
+
+    # Special case: 1 has no proper divisors
+    if number == 1:
+        return False
+
+    # Find sum of all proper divisors
+    # We only need to check up to number//2 since no proper divisor
+    # can be greater than half the number
+    divisor_sum = sum(i for i in range(1, number // 2 + 1) if number % i == 0)
+
+    return divisor_sum == number
+
+
+def perfect_optimized(number: int) -> bool:
+    if not isinstance(number, int):
+        raise ValueError(""number must be an integer"")
+
+    if number <= 1:
+        return False
+
+    divisor_sum = 1  # 1 is always a proper divisor for n > 1
+
+    # Check divisors up to sqrt(number)
+    i = 2
+    while i * i <= number:
+        if number % i == 0:
+            divisor_sum += i
+            # Add the paired divisor if it's different from i
+            if i != number // i:
+                divisor_sum += number // i
+        i += 1
+
+    return divisor_sum == number
+
+
+def find_perfect_numbers(limit: int) -> list[int]:
+    if not isinstance(limit, int) or limit < 0:
+        raise ValueError(""limit must be a non-negative integer"")
+
+    return [n for n in range(1, limit + 1) if perfect(n)]
+
+
+def get_divisors(number: int) -> list[int]:
+    if not isinstance(number, int) or number <= 0:
+        raise ValueError(""number must be a positive integer"")
+
+    if number == 1:
+        return []
+
+    return [i for i in range(1, number // 2 + 1) if number % i == 0]
+
+
+if __name__ == ""__main__"":
+
+    testmod(verbose=True)
+
+    print(""\nPerfect Number Checker"")
+    print(""="" * 40)
+    print(""A perfect number equals the sum of its proper divisors."")
+    print(""Examples: 6 (1+2+3), 28 (1+2+4+7+14), 496, 8128, ..."")
+    print()
+
+    while True:
+        try:
+            user_input = input(""Enter a positive integer (or 'q' to quit): "").strip()
+            if user_input.lower() == ""q"":
+                break
+
+            number = int(user_input)
+
+            if number <= 0:
+                print(""Please enter a positive integer."")
+                continue
+
+            is_perfect = perfect(number)
+            divisors = get_divisors(number)
+            divisor_sum = sum(divisors)
+
+            print(f""\nNumber: {number}"")
+            print(f""Proper divisors: {divisors}"")
+            print(f""Sum of divisors: {divisor_sum}"")
+            print(f""Is perfect: {'Yes' if is_perfect else 'No'}"")
+
+            if is_perfect:
+                print(f""✓ {number} is a Perfect Number!"")
+            else:
+                print(f""✗ {number} is not a Perfect Number."")
+
+            print(""-"" * 40)
+
+        except ValueError as e:
+            if ""invalid literal"" in str(e):
+                print(""Please enter a valid integer."")
+            else:
+                print(f""Error: {e}"")
+        except KeyboardInterrupt:
+            print(""\nGoodbye!"")
+            break
+"
+maths/base_neg2_conversion,1,chatgpt-manual,"def to_base_neg2(n):
+    if n == 0:
+        return ""0""
+    bits = []
+    while n:
+        n, r = divmod(n, -2)
+        if r < 0:
+            n += 1
+            r += 2
+        bits.append(str(r))
+    return """".join(reversed(bits))
+
+if __name__ == ""__main__"":
+    print(to_base_neg2(int(input(""Integer: ""))))
+"
+strings/manacher,1,chatgpt-manual,"def longest_palindrome(s):
+    if not s:
+        return """"
+    transformed = ""^#"" + ""#"".join(s) + ""#$""
+    radius = [0] * len(transformed)
+    center = right = 0
+    for i in range(1, len(transformed) - 1):
+        mirror = 2 * center - i
+        if i < right:
+            radius[i] = min(right - i, radius[mirror])
+        while transformed[i + radius[i] + 1] == transformed[i - radius[i] - 1]:
+            radius[i] += 1
+        if i + radius[i] > right:
+            center, right = i, i + radius[i]
+    length = max(radius)
+    pos = radius.index(length)
+    start = (pos - length) // 2
+    return s[start:start + length]
+
+if __name__ == ""__main__"":
+    print(longest_palindrome(input(""Text: "")))
+"
+ciphers/porta_cipher,1,chatgpt-manual,"TABLE = [""NOPQRSTUVWXYZ"", ""OPQRSTUVWXYZN"", ""PQRSTUVWXYZN O"", ""QRSTUVWXYZNOP"", ""RSTUVWXYZNOPQ"", ""STUVWXYZNOPQR"", ""TUVWXYZNOPQRS"", ""UVWXYZNOPQRST"", ""VWXYZNOPQRSTU"", ""WXYZNOPQRSTUV"", ""XYZNOPQRSTUVW"", ""YZNOPQRSTUVWX"", ""ZNOPQRSTUVWXY""]
+
+def porta(text, key):
+    alphabet = ""ABCDEFGHIJKLMNOPQRSTUVWXYZ""
+    key = """".join(c for c in key.upper() if c in alphabet)
+    if not key:
+        raise ValueError(""Key must contain letters"")
+    result = []
+    j = 0
+    for ch in text.upper():
+        if ch not in alphabet:
+            result.append(ch)
+            continue
+        row = (ord(key[j % len(key)]) - 65) // 2
+        x = ord(ch) - 65
+        result.append(chr(65 + (13 + (x + row) % 13 if x < 13 else (x - 13 - row) % 13)))
+        j += 1
+    return """".join(result)
+
+if __name__ == ""__main__"":
+    key = input(""Key: "")
+    cipher = porta(input(""Plaintext: ""), key)
+    print(""Cipher:"", cipher)
+    print(""Decoded:"", porta(cipher, key))
+"
+strings/damerau_levenshtein_distance,1,chatgpt-manual,"def damerau_levenshtein(a, b):
+    n, m = len(a), len(b)
+    dp = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(n + 1):
+        dp[i][0] = i
+    for j in range(m + 1):
+        dp[0][j] = j
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            cost = int(a[i - 1] != b[j - 1])
+            dp[i][j] = min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost)
+            if i > 1 and j > 1 and a[i - 1] == b[j - 2] and a[i - 2] == b[j - 1]:
+                dp[i][j] = min(dp[i][j], dp[i - 2][j - 2] + 1)
+    return dp[n][m]
+
+if __name__ == ""__main__"":
+    print(damerau_levenshtein(input(""First word: ""), input(""Second word: "")))
+"
+data_structures/circular_queue,1,chatgpt-manual,"class CircularQueue:
+    def __init__(self, capacity):
+        if capacity <= 0:
+            raise ValueError(""Capacity must be positive"")
+        self.items = [None] * capacity
+        self.front = 0
+        self.size = 0
+
+    def enqueue(self, value):
+        if self.size == len(self.items):
+            raise OverflowError(""Queue full"")
+        pos = (self.front + self.size) % len(self.items)
+        self.items[pos] = value
+        self.size += 1
+
+    def dequeue(self):
+        if self.size == 0:
+            raise IndexError(""Queue empty"")
+        value = self.items[self.front]
+        self.items[self.front] = None
+        self.front = (self.front + 1) % len(self.items)
+        self.size -= 1
+        return value
+
+if __name__ == ""__main__"":
+    q = CircularQueue(3)
+    for x in (10, 20, 30):
+        q.enqueue(x)
+    print(q.dequeue())
+    q.enqueue(40)
+    print([q.dequeue() for _ in range(q.size)])
+"
+maths/aliquot_sum,1,chatgpt-manual,"def aliquot_sum(n):
+    if n <= 1:
+        return 0
+    result = 1
+    d = 2
+    while d * d <= n:
+        if n % d == 0:
+            result += d
+            if d * d != n:
+                result += n // d
+        d += 1
+    return result
+
+if __name__ == ""__main__"":
+    print(aliquot_sum(int(input(""Positive integer: ""))))
+"
+maths/perfect_number,1,chatgpt-manual,"def proper_divisor_sum(n):
+    if n < 2:
+        return 0
+    total = 1
+    for i in range(2, int(n ** 0.5) + 1):
+        if n % i == 0:
+            total += i
+            if i * i != n:
+                total += n // i
+    return total
+
+def is_perfect(n):
+    return n > 1 and proper_divisor_sum(n) == n
+
+if __name__ == ""__main__"":
+    n = int(input(""Number: ""))
+    print(""Perfect"" if is_perfect(n) else ""Not perfect"")
+"
+greedy_methods/sliding_window,1,chatgpt-manual,"def max_window_sum(numbers, width):
+    if width <= 0 or width > len(numbers):
+        raise ValueError(""Invalid window size"")
+    current = sum(numbers[:width])
+    best = current
+    for i in range(width, len(numbers)):
+        current += numbers[i] - numbers[i - width]
+        best = max(best, current)
+    return best
+
+if __name__ == ""__main__"":
+    values = [int(x) for x in input(""Numbers: "").split()]
+    k = int(input(""Window width: ""))
+    print(""Maximum window sum:"", max_window_sum(values, k))
+"
+maths/abundant_numbers,1,chatgpt-manual,"def divisor_sum(n):
+    if n < 2:
+        return 0
+    total = 1
+    for d in range(2, int(n ** 0.5) + 1):
+        if n % d == 0:
+            total += d
+            if d != n // d:
+                total += n // d
+    return total
+
+def abundant_numbers(limit):
+    return [n for n in range(1, limit + 1) if divisor_sum(n) > n]
+
+if __name__ == ""__main__"":
+    print(abundant_numbers(int(input(""Upper limit: ""))))
+"
+maths/fermat_little_theorem,1,chatgpt-manual,"def is_prime(n):
+    if n < 2:
+        return False
+    for d in range(2, int(n ** 0.5) + 1):
+        if n % d == 0:
+            return False
+    return True
+
+def fermat_inverse(a, p):
+    if not is_prime(p):
+        raise ValueError(""Modulus must be prime"")
+    if a % p == 0:
+        raise ValueError(""Inverse does not exist"")
+    return pow(a, p - 2, p)
+
+if __name__ == ""__main__"":
+    a, p = map(int, input(""Number and prime modulus: "").split())
+    print(""Inverse:"", fermat_inverse(a, p))
+"
+ciphers/base58,1,chatgpt-manual,"ALPHABET = ""123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz""
+
+def base58_encode(data):
+    n = int.from_bytes(data, ""big"")
+    digits = """"
+    while n:
+        n, rem = divmod(n, 58)
+        digits = ALPHABET[rem] + digits
+    zeros = len(data) - len(data.lstrip(b""\x00""))
+    return ""1"" * zeros + digits
+
+def base58_decode(text):
+    n = 0
+    for char in text:
+        if char not in ALPHABET:
+            raise ValueError(""Invalid Base58 character"")
+        n = n * 58 + ALPHABET.index(char)
+    raw = n.to_bytes((n.bit_length() + 7) // 8, ""big"") if n else b""""
+    return b""\x00"" * (len(text) - len(text.lstrip(""1""))) + raw
+
+if __name__ == ""__main__"":
+    value = input(""Text to encode: "").encode()
+    encoded = base58_encode(value)
+    print(""Base58:"", encoded)
+    print(""Decoded:"", base58_decode(encoded).decode())
+"
+ciphers/deterministic_miller_rabin,1,chatgpt-manual,"def is_prime_64(n):
+    if n < 2:
+        return False
+    for p in (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37):
+        if n % p == 0:
+            return n == p
+    d = n - 1
+    s = 0
+    while d % 2 == 0:
+        s += 1
+        d //= 2
+    for a in (2, 325, 9375, 28178, 450775, 9780504, 1795265022):
+        if a % n == 0:
+            continue
+        x = pow(a, d, n)
+        if x in (1, n - 1):
+            continue
+        for _ in range(s - 1):
+            x = x * x % n
+            if x == n - 1:
+                break
+        else:
+            return False
+    return True
+
+if __name__ == ""__main__"":
+    n = int(input(""Unsigned 64-bit integer: ""))
+    if not 0 <= n < 2 ** 64:
+        raise ValueError(""Input outside 64-bit range"")
+    print(""Prime"" if is_prime_64(n) else ""Composite"")
+"
+data_structures/product_sum,1,chatgpt-manual,"def product_sum(value, depth=1):
+    if isinstance(value, int):
+        return value
+    if not isinstance(value, list):
+        raise TypeError(""Expected nested lists of integers"")
+    total = sum(product_sum(item, depth + 1) if isinstance(item, int) else product_sum(item, depth + 1)
+                for item in value)
+    return total * depth
+
+if __name__ == ""__main__"":
+    example = [5, 2, [7, -1], 3, [6, [-13, 8], 4]]
+    print(product_sum(example))
+"
+sorts/quick_sort,1,chatgpt-manual,"def quick_sort(items):
+    if len(items) < 2:
+        return list(items)
+    pivot = items[len(items) // 2]
+    lower = [x for x in items if x < pivot]
+    equal = [x for x in items if x == pivot]
+    higher = [x for x in items if x > pivot]
+    return quick_sort(lower) + equal + quick_sort(higher)
+
+if __name__ == ""__main__"":
+    print(quick_sort([int(x) for x in input(""Numbers: "").split()]))
+"
+greedy_methods/minimize_deviation_in_array,0,human,"from heapq import heapify, heappop, heappush
+
+
+class Solution:
+    def minimum_deviation(self, nums: list[int]) -> int:
+        heapque = [-n * 2 if n % 2 else -n for n in nums]
+        heapify(heapque)
+        temp_min = -min(heapque, key=lambda num: -num)
+        temp_mindeviation = -heapque[0] - temp_min
+
+        while heapque and heapque[0] % 2 == 0:
+            n = heappop(heapque) // 2
+            heappush(heapque, n)
+            temp_min = min(temp_min, -n)
+            temp_mindeviation = min(temp_mindeviation, -heapque[0] - temp_min)
+
+        return temp_mindeviation
+"
+maths/pythagoras,0,human,"import math
+
+
+class Point:
+    def __init__(self, x, y, z) -> None:
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def __repr__(self) -> str:
+        return f""Point({self.x}, {self.y}, {self.z})""
+
+
+def distance(a: Point, b: Point) -> float:
+    return math.sqrt(abs((b.x - a.x) ** 2 + (b.y - a.y) ** 2 + (b.z - a.z) ** 2))
+"
+conversions/rgb_hsv_conversion,0,human,"def hsv_to_rgb(hue: float, saturation: float, value: float) -> list[int]:
+    if hue < 0 or hue > 360:
+        raise Exception(""hue should be between 0 and 360"")
+
+    if saturation < 0 or saturation > 1:
+        raise Exception(""saturation should be between 0 and 1"")
+
+    if value < 0 or value > 1:
+        raise Exception(""value should be between 0 and 1"")
+
+    chroma = value * saturation
+    hue_section = hue / 60
+    second_largest_component = chroma * (1 - abs(hue_section % 2 - 1))
+    match_value = value - chroma
+
+    if hue_section >= 0 and hue_section <= 1:
+        red = round(255 * (chroma + match_value))
+        green = round(255 * (second_largest_component + match_value))
+        blue = round(255 * (match_value))
+    elif hue_section > 1 and hue_section <= 2:
+        red = round(255 * (second_largest_component + match_value))
+        green = round(255 * (chroma + match_value))
+        blue = round(255 * (match_value))
+    elif hue_section > 2 and hue_section <= 3:
+        red = round(255 * (match_value))
+        green = round(255 * (chroma + match_value))
+        blue = round(255 * (second_largest_component + match_value))
+    elif hue_section > 3 and hue_section <= 4:
+        red = round(255 * (match_value))
+        green = round(255 * (second_largest_component + match_value))
+        blue = round(255 * (chroma + match_value))
+    elif hue_section > 4 and hue_section <= 5:
+        red = round(255 * (second_largest_component + match_value))
+        green = round(255 * (match_value))
+        blue = round(255 * (chroma + match_value))
+    else:
+        red = round(255 * (chroma + match_value))
+        green = round(255 * (match_value))
+        blue = round(255 * (second_largest_component + match_value))
+
+    return [red, green, blue]
+
+
+def rgb_to_hsv(red: int, green: int, blue: int) -> list[float]:
+    if red < 0 or red > 255:
+        raise Exception(""red should be between 0 and 255"")
+
+    if green < 0 or green > 255:
+        raise Exception(""green should be between 0 and 255"")
+
+    if blue < 0 or blue > 255:
+        raise Exception(""blue should be between 0 and 255"")
+
+    float_red = red / 255
+    float_green = green / 255
+    float_blue = blue / 255
+    value = max(float_red, float_green, float_blue)
+    chroma = value - min(float_red, float_green, float_blue)
+    saturation = 0 if value == 0 else chroma / value
+
+    if chroma == 0:
+        hue = 0.0
+    elif value == float_red:
+        hue = 60 * (0 + (float_green - float_blue) / chroma)
+    elif value == float_green:
+        hue = 60 * (2 + (float_blue - float_red) / chroma)
+    else:
+        hue = 60 * (4 + (float_red - float_green) / chroma)
+
+    hue = (hue + 360) % 360
+
+    return [hue, saturation, value]
+
+
+def approximately_equal_hsv(hsv_1: list[float], hsv_2: list[float]) -> bool:
+    check_hue = abs(hsv_1[0] - hsv_2[0]) < 0.2
+    check_saturation = abs(hsv_1[1] - hsv_2[1]) < 0.002
+    check_value = abs(hsv_1[2] - hsv_2[2]) < 0.002
+
+    return check_hue and check_saturation and check_value
+"
+greedy_methods/minimize_deviation_in_array,1,chatgpt-manual,"import heapq
+
+def minimum_deviation(nums):
+    if not nums:
+        return 0
+    heap = []
+    smallest = float(""inf"")
+    for x in nums:
+        if x <= 0:
+            raise ValueError(""Only positive integers are supported"")
+        y = x * 2 if x % 2 else x
+        smallest = min(smallest, y)
+        heapq.heappush(heap, -y)
+    answer = float(""inf"")
+    while heap:
+        largest = -heapq.heappop(heap)
+        answer = min(answer, largest - smallest)
+        if largest % 2:
+            break
+        half = largest // 2
+        smallest = min(smallest, half)
+        heapq.heappush(heap, -half)
+    return answer
+
+if __name__ == ""__main__"":
+    print(minimum_deviation([int(x) for x in input(""Positive integers: "").split()]))
+"
+maths/pythagoras,1,chatgpt-manual,"from math import gcd
+
+def pythagorean_triples(limit):
+    triples = set()
+    for m in range(2, int(limit ** 0.5) + 2):
+        for n in range(1, m):
+            if (m - n) % 2 == 0 or gcd(m, n) != 1:
+                continue
+            a, b, c = m * m - n * n, 2 * m * n, m * m + n * n
+            for k in range(1, limit // c + 1):
+                triples.add(tuple(sorted((k * a, k * b))) + (k * c,))
+    return sorted(triples)
+
+if __name__ == ""__main__"":
+    print(pythagorean_triples(int(input(""Maximum hypotenuse: ""))))
+"
+conversions/rgb_hsv_conversion,1,chatgpt-manual,"import colorsys
+
+def rgb_to_hsv(r, g, b):
+    if any(not 0 <= x <= 255 for x in (r, g, b)):
+        raise ValueError(""RGB values must be 0..255"")
+    h, s, v = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+    return h * 360, s * 100, v * 100
+
+def hsv_to_rgb(h, s, v):
+    if not (0 <= h <= 360 and 0 <= s <= 100 and 0 <= v <= 100):
+        raise ValueError(""Invalid HSV"")
+    return tuple(round(x * 255) for x in colorsys.hsv_to_rgb((h % 360) / 360, s / 100, v / 100))
+
+if __name__ == ""__main__"":
+    rgb = tuple(map(int, input(""R G B: "").split()))
+    hsv = rgb_to_hsv(*rgb)
+    print(""HSV:"", hsv)
+    print(""RGB round-trip:"", hsv_to_rgb(*hsv))
+"
